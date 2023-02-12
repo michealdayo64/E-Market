@@ -1,0 +1,185 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    
+    
+    #stripeBtnLabel{
+      font-family: "Helvetica Neue", Helvetica, sans-serif;
+      font-weight: bold;
+      font-size: 16px;
+      font-variant: normal;
+      padding: 0;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    #stripeBtn {
+      border: none;
+      border-radius: 4px;
+      outline: none;
+      text-decoration: none;
+      color: #fff;
+      background: #32325d;
+      white-space: nowrap;
+      display: inline-block;
+      height: 40px;
+      line-height: 40px;
+      padding: 0 14px;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+      text-decoration: none;
+      -webkit-transition: all 150ms ease;
+      transition: all 150ms ease;
+      float: left;
+      margin-left: 12px;
+      margin-top: 28px;
+    }
+    
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, .10), 0 3px 6px rgba(0, 0, 0, .08);
+      background-color: #43458b;
+    }
+    
+    #stripe-form {
+      padding: 30px;
+      height: 120px;
+      background-color: white;
+    }
+    
+    label {
+      font-weight: 500;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    #card-errors {
+      height: 20px;
+      padding: 4px 0;
+      color: #fa755a;
+    }
+    
+    .stripe-form-row {
+      width: 70%;
+      float: left;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /**
+     * The CSS shown here will not be introduced in the Quickstart guide, but shows
+     * how you can use CSS to style your Element's container.
+     */
+    .StripeElement {
+      box-sizing: border-box;
+    
+      height: 40px;
+    
+      padding: 10px 12px;
+    
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background-color: white;
+    
+      box-shadow: 0 1px 3px 0 #e6ebf1;
+      -webkit-transition: box-shadow 150ms ease;
+      transition: box-shadow 150ms ease;
+    }
+    
+    .StripeElement--focus {
+      box-shadow: 0 1px 3px 0 #cfd7df;
+    }
+    
+    .StripeElement--invalid {
+      border-color: #fa755a;
+    }
+    
+    .StripeElement--webkit-autofill {
+      background-color: #fefde5 !important;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container wow fadeIn">
+      <div class="text-center">
+       <p></p>
+        <h2>Payment</h2>
+        
+      </div>
+
+      <div class="row">
+        
+        <div class="col-md-12 order-md-1">
+          <h4 class="mb-3"></h4>
+
+              
+              
+              
+              <body>
+                
+               
+              
+                <form action="" method="post">
+                  {% csrf_token %}
+                  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                    data-key="{{ key }}"
+                    data-description="Complete your order"
+                    data-amount="{{ amount }}"
+                    data-locale="auto">
+                </script>
+                </form>
+                </div>
+                <br><br>
+              
+                <div class="col-md-12 order-md-2 mb-4">
+                    <h4 class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-muted">Your cart</span>
+                      <span class="badge badge-secondary badge-pill">{{ order.items.count }}</span>
+                    </h4>
+                    <ul class="list-group mb-3">
+                      {% for order_item in order.items.all %}
+                      <li class="list-group-item d-flex justify-content-between lh-condensed">
+                        <div>
+                          <h6 class="my-0">{{ order_item.quantity }} x {{ order_item.item.title }}</h6>
+                          <small class="text-muted">{{ order_item.item.description }}</small>
+                        </div>
+                        <span class="text-muted">${{ order_item.get_final_price }}</span>
+                      </li>
+                        {% endfor %}
+                        {% if order.coupon %}
+                      <li class="list-group-item d-flex justify-content-between bg-light">
+                        <div class="text-success">
+                          <h6 class="my-0">Promo code</h6>
+                          <small>{{ order.coupon.code }}</small>
+                        </div>
+                        <span class="text-success">${{ order.coupon.amount }}</span>
+                      </li>
+                      {% endif %}
+                      <li class="list-group-item d-flex justify-content-between">
+                        <span>Total (USD)</span>
+                        <strong>${{ order.get_total }}</strong>
+                      </li>
+                    </ul>
+              
+        </div>
+      </div>
+
+      
+  {% endblock %}
+      <!-- Bootstrap core JavaScript
+      ================================================== -->
+      <!-- Placed at the end of the document so the pages load faster -->
+      
