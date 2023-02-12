@@ -5,6 +5,7 @@ Django==3.0
 django-jsonfield==1.4.1
 django-stripe-payments==2.0.0
 djangorestframework==3.14.0
+gunicorn==20.1.0
 idna==3.4
 Pillow==8.4.0
 psycopg2-binary==2.8.6
