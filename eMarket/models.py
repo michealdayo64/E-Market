@@ -30,7 +30,7 @@ class Category(models.Model):
     name = models.CharField(max_length = 50, unique = True)
     created = models.DateTimeField(default = timezone.now)
     slug = models.SlugField()
-    photo = models.ImageField(upload_to='media', default = False, blank = True)
+    photo = models.ImageField(upload_to='media/', default = False, blank = True)
 
     def __str__(self):
         return self.name

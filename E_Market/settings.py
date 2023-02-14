@@ -28,8 +28,8 @@ SECRET_KEY = config('SECRET_KEY')
 #DEBUG = True
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["52.54.38.177"]
-#ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = ["52.54.38.177"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'eMarketApi',
     'stripe',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'storages'
 
 ]
 
@@ -172,3 +173,11 @@ REST_FRAMEWORK = {
 #'rest_framework.authentication.SessionAuthentication',
 )
 }
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+
+AWS_STORAGE_BUCKET_NAME = 'emarketphotos'
+
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
