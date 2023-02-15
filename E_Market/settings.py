@@ -28,8 +28,8 @@ SECRET_KEY = config('SECRET_KEY')
 #DEBUG = True
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-#ALLOWED_HOSTS = ["52.54.38.177"]
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["52.54.38.177"]
+#ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -154,9 +154,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_cdn')
 
 LOGIN_URL = '/'
 
-#STRIPE_SECRET_KEY = "sk_test_51HnYkuL8AHTi24Fj9s5gfx1CuaNWOPnTXEZmCqHgFJ84knXIfCwIXbtzbTGFTyp7yRKzOCpOXRz4udfBMtu50cwq00FagSzKaL"
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-#STRIPE_PUBLISHABLE_KEY = "pk_test_51HnYkuL8AHTi24FjyIJ8ZmkTQV38adRanMo7g0p0l5GFRJld0sQEMqqWYKLqdvEFT82UTRlfas26DFyocukltE75008GDo3Ui9"
 STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY")
 
 
