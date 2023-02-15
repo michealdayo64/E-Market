@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 
 # Create your models here.
 
@@ -40,6 +41,11 @@ class Category(models.Model):
         if self.photo and hasattr(self.photo, 'url'):
             return self.photo.url
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Category, self).save(*args, **kwargs)
+
 
     def get_absolute_url(self):
         return reverse('eMarket:product_list_by_category', args=[self.slug])
@@ -47,25 +53,24 @@ class Category(models.Model):
 class Products(models.Model):
     category = models.ForeignKey(Category, on_delete = models.CASCADE, related_name = 'categories')
     title = models.CharField(max_length=50, unique = True)
-    discount_price = models.FloatField()
+    discount_price = models.FloatField(default=0)
     slug = models.SlugField()
     description = models.TextField()
     image = models.ImageField(upload_to='media')
     price = models.FloatField()
-    stock = models.PositiveIntegerField(default = False)
+    stock = models.PositiveIntegerField(default = 0)
     available = models.BooleanField(default=True)
     created_date = models.DateTimeField(default = timezone.now)
-    size = models.CharField(choices=SIZE_CHOICES, max_length=20, default = False)
-    favourite = models.ManyToManyField(User, default = False, blank = True)
+    size = models.CharField(choices=SIZE_CHOICES, max_length=20, blank=True, null=True)
+    favourite = models.ManyToManyField(User, blank = True)
 
     def __str__(self):
         return self.title
 
-    '''def favCount(self):
-        total = 0
-        for fav in self.favourite.all():
-            total += fav.user.id
-        return total'''
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Products, self).save(*args, **kwargs)
 
     def percent_removed(self):
         if self.price:
