@@ -12,7 +12,7 @@
 
                     <ul>
                         {% for cat in categories %}
-                        <li><a href="{% url 'eMarket:category-detail' cat.id %}">{{ cat.name }}</a></li>
+                        <li><a href="{% url 'eMarket:category-detail' cat.slug %}">{{ cat.name }}</a></li>
                         {% endfor %}
                     </ul>
 
@@ -24,8 +24,8 @@
                     <div class="hero__search__form">
                         <form action="#">
 
-                            <input type="text" placeholder="What do yo u need?">
-                            <button type="submit" class="site-btn">SEARCH</button>
+                            <input type="text" id="search" placeholder="Search By Category Or Product">
+                            <button type="submit" id="searchBtn" class="site-btn">SEARCH</button>
                         </form>
                     </div>
                     <div class="hero__search__phone">
@@ -43,3 +43,4 @@
         </div>
     </div>
 </section>
+

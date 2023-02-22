@@ -1,6 +1,10 @@
 {% extends '../base.html' %}
 {% load static %}
 
+{% block title %} 
+Organic | Shop
+{% endblock %}
+
 {% block content %}
 
 <!-- Hero Section Begin -->
@@ -39,62 +43,8 @@
                             {% endfor %}
                         </ul>
                     </div>
-                    <div class="sidebar__item">
-                        <h4>Price</h4>
-                        <div class="price-range-wrap">
-                            <div class="price-range ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content"
-                                data-min="10" data-max="540">
-                                <div class="ui-slider-range ui-corner-all ui-widget-header"></div>
-                                <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
-                                <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
-                            </div>
-                            <div class="range-slider">
-                                <div class="price-input">
-                                    <input type="text" id="minamount">
-                                    <input type="text" id="maxamount">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="sidebar__item sidebar__item__color--option">
-                        <h4>Colors</h4>
-                        <div class="sidebar__item__color sidebar__item__color--white">
-                            <label for="white">
-                                White
-                                <input type="radio" id="white">
-                            </label>
-                        </div>
-                        <div class="sidebar__item__color sidebar__item__color--gray">
-                            <label for="gray">
-                                Gray
-                                <input type="radio" id="gray">
-                            </label>
-                        </div>
-                        <div class="sidebar__item__color sidebar__item__color--red">
-                            <label for="red">
-                                Red
-                                <input type="radio" id="red">
-                            </label>
-                        </div>
-                        <div class="sidebar__item__color sidebar__item__color--black">
-                            <label for="black">
-                                Black
-                                <input type="radio" id="black">
-                            </label>
-                        </div>
-                        <div class="sidebar__item__color sidebar__item__color--blue">
-                            <label for="blue">
-                                Blue
-                                <input type="radio" id="blue">
-                            </label>
-                        </div>
-                        <div class="sidebar__item__color sidebar__item__color--green">
-                            <label for="green">
-                                Green
-                                <input type="radio" id="green">
-                            </label>
-                        </div>
-                    </div>
+                    
+                    
                     <div class="sidebar__item">
                         <h4>Popular Size</h4>
                         <div class="sidebar__item__size">
@@ -210,12 +160,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    {% for p in products %}
+                
+                <div class="row" id="prev-result">
+                    {% for p in page_obj %}
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="product__item">
-                            <div class="product__item__pic set-bg" data-setbg="{{ p.image.url }}">
-                                
+                            <div class="product__item__pic set-bg">
+                                <img src="{{ p.image.url }}" alt="" srcset="">
                                 <ul class="product__item__pic__hover">
                                     
                                     {% if user.is_authenticated %}
@@ -246,16 +197,136 @@
                     {% endfor %}
                     
                 </div>
-                <div class="product__pagination">
-                    <a href="#">1</a>
-                    <a href="#">2</a>
-                    <a href="#">3</a>
-                    <a href="#"><i class="fa fa-long-arrow-right"></i></a>
+            
+                <div class="row" id="search-row">
+                    <div class="col-lg-4 col-md-6 col-sm-6" id="search-col">
+                        <div class="product__item" id="search-result">
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="product__pagination" id="pag">
+                    {% if page_obj.has_previous %}
+                    <a href="?{{ page_request_var }}={{ page_obj.previous_page_number }}">Prev</a>
+                    {% endif %}
+                    <a href="?{{ page_request_var }}={{ page_obj.number }}">{{ page_obj.number }}</a>
+                    {% if page_obj.has_next %}
+                    <a href="?{{ page_request_var }}={{ page_obj.next_page_number }}"><i class="fa fa-long-arrow-right"></i></a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </section>
 <!-- Product Section End -->
+
+<script> 
+    const searchData = document.getElementById('search')
+    const searchResult = document.getElementById('search-result')
+    const prevResult = document.getElementById('prev-result')
+    const searchRow = document.getElementById('search-row')
+    const searchCol = document.getElementById('search-col')
+    const pagenate = document.getElementById('pag')
+    const searchBtn = document.getElementById('searchBtn')
+
+    const url = window.location.origin
+     
+    searchRow.style.display = "none"
+    searchCol.style.display = "none"
+
+
+    // SEARCH BUTTON
+    searchBtn.addEventListener('click', (e) =>{
+        e.preventDefault()
+        const dataInput = searchData.value;
+        console.log(dataInput)
+        if(dataInput.trim().length > 0){
+            searchResult.innerHTML = ""
+            pagenate.style.display = "none"
+            fetch(`${url}/search/`, {
+            body: JSON.stringify({
+          search: dataInput
+        }),
+        method: "POST"
+        }).then((res) => res.json()).then((data) => {
+            let json_data = JSON.parse(data)
+            console.log(json_data.res)
+            //let resultData = json_data.res
+            prevResult.style.display = "none"
+            searchRow.style.display = "block"
+            searchCol.style.display = "block"
+            
+            if(json_data.length === 0){
+                searchResult.innerHTML = "<p>No result found</p>"
+
+            }else{
+                json_data.res.forEach((da) =>{
+                    console.log(da)
+                    searchResult.innerHTML += `
+                            <div class="product__item__pic set-bg" data-setbg="${da.image.url}">
+                                
+                            </div>
+                            <div class="product__item__text">
+                                <h6><a href="{{ p.get_absolute_url }}">${da.title}</a></h6>
+                                <h5>${ da.price }</h5>
+                            </div>
+                    `
+                })
+            }
+        })
+        }else{
+            searchResult.style.display = "none"
+            prevResult.style.display = "block"
+            pagenate.style.display = "none"
+        }
+    })
+    
+
+    // SEARCH INPUT
+    searchData.addEventListener('keyup', (e) =>{
+        e.preventDefault()
+        const inputData = e.target.value
+        if(inputData.length > 0){
+            searchResult.innerHTML = ""
+            pagenate.style.display = "none"
+            fetch(`${url}/search/`, {
+            body: JSON.stringify({
+          search: inputData
+        }),
+        method: "POST"
+        }).then((res) => res.json()).then((data) => {
+            let json_data = JSON.parse(data)
+
+            prevResult.style.display = "none"
+            searchRow.style.display = "block"
+            searchCol.style.display = "block"
+            
+            if(json_data.resErr){
+                searchResult.innerHTML = "<p>No result found</p>"
+
+            }else{
+                json_data.forEach((da) =>{
+                    searchResult.innerHTML += `
+                            <div class="product__item__pic set-bg">
+                                <img src="${da.img}"" alt="" srcset="">
+                            </div>
+                            <div class="product__item__text">
+                                <h6><a href="${url}/product/${da.prod_url}">${da.title}</a></h6>
+                                <h5>${ da.price }</h5>
+                            </div>
+                    `
+                })
+            }
+        })
+        }else{
+            prevResult.style.display = "block"
+            pagenate.style.display = "block"
+            searchResult.innerHTML = ""
+        }
+    })
+    
+    
+    </script>
 
  {% endblock %}

@@ -1,6 +1,8 @@
 {% extends '../base.html' %}
 {% load static %}
-
+{% block title %} 
+Organic | Home
+{% endblock %}
 
 {% block content %}
 
@@ -45,17 +47,26 @@
 
 <section class="categories">
     <div class="container">
-        <div class="row">
+        <div class="row" id="prev-result">
             <div class="categories__slider owl-carousel">
                 {% for ca in categories %}
                 <div class="col-lg-3">
 
                     <div class="categories__item set-bg" data-setbg="{{ ca.photo_url }}">
-                        <h5><a href="{% url 'eMarket:category-detail' ca.id %}">{{ ca.name }}</a></h5>
+                        <h5><a href="{% url 'eMarket:category-detail' ca.slug %}">{{ ca.name }}</a></h5>
                     </div>
 
                 </div>
                 {% endfor %}
+            </div>
+        </div>
+
+        <div class="row" id="search-row">
+            <div class="col-lg-4 col-md-6 col-sm-6" id="search-col">
+                <div class="product__item" id="search-result">
+
+                </div>
+
             </div>
         </div>
     </div>
@@ -121,5 +132,121 @@
             </div>
         </div>
     </section>
+
+    <script>
+        const searchData = document.getElementById('search')
+    const searchResult = document.getElementById('search-result')
+    const prevResult = document.getElementById('prev-result')
+    const searchRow = document.getElementById('search-row')
+    const searchCol = document.getElementById('search-col')
+    const searchBtn = document.getElementById('searchBtn')
+
+    const url = window.location.origin
+     
+    searchRow.style.display = "none"
+    searchCol.style.display = "none"
+
+    searchBtn.addEventListener('click', (e) =>{
+        e.preventDefault()
+        const dataInput = searchData.value;
+        console.log(dataInput)
+        if(dataInput.trim().length > 0){
+            searchResult.innerHTML = ""
+            fetch(`${url}/search/`, {
+            body: JSON.stringify({
+          search: dataInput
+        }),
+        method: "POST"
+        }).then((res) => res.json()).then((data) => {
+            let json_data = JSON.parse(data)
+            console.log(json_data.res)
+            //let resultData = json_data.res
+            prevResult.style.display = "none"
+            searchRow.style.display = "block"
+            searchCol.style.display = "block"
+            
+            if(json_data.resErr){
+                searchResult.innerHTML = "<p>No result found</p>"
+
+            }else{
+                json_data.forEach((da) =>{
+                    console.log(da)
+                    searchResult.innerHTML += `
+                            <div class="product__item__pic set-bg" data-setbg="${da.image}">
+                                
+                                <ul class="product__item__pic__hover">
+                                    
+                         
+                        <a href="" class="heart-icon"><i class="fa fa-heart"></i></span></a>
+                
+                                    <li><a href="${da.id}"><i class="fa fa-shopping-cart"></i></a></li>
+                                    
+                                </ul>
+                            </div>
+                            <div class="product__item__text">
+                                <h6><a href="{{ p.get_absolute_url }}">${da.title}</a></h6>
+                                <h5>${ da.price }</h5>
+                            </div>
+                    `
+                })
+            }
+        })
+        }else{
+            searchResult.style.display = "none"
+            prevResult.style.display = "block"
+            
+        }
+    })
+    
+    searchData.addEventListener('keyup', (e) =>{
+        e.preventDefault()
+        const inputData = e.target.value
+        if(inputData.trim().length > 0){
+            searchResult.innerHTML = ""
+            
+            fetch(`${url}/search/`, {
+            body: JSON.stringify({
+          search: inputData
+        }),
+        method: "POST"
+        }).then((res) => res.json()).then((data) => {
+            let json_data = JSON.parse(data)
+            console.log(json_data)
+            //let resultData = json_data.res
+            prevResult.style.display = "none"
+            searchRow.style.display = "block"
+            searchCol.style.display = "block"
+            
+            if(json_data.resErr){
+                searchResult.innerHTML = "<p>No result found</p>"
+
+            }else{
+                json_data.forEach((da) =>{
+                    console.log(da)
+                    searchResult.innerHTML += `
+                            <div class="product__item__pic set-bg" data-setbg="${da.image}">
+                                
+                                <ul class="product__item__pic__hover">
+                                    
+                                    
+                                </ul>
+                            </div>
+                            <div class="product__item__text">
+                                <h6><a href="${url}/product/${da.prod_url}">${da.title}</a></h6>
+                                <h5>${ da.price }</h5>
+                            </div>
+                    `
+                })
+            }
+        })
+        }else{
+            searchResult.style.display = "none"
+            prevResult.style.display = "block"
+            
+        }
+        
+        
+    })
+    </script>
 
     {% endblock %}

@@ -8,9 +8,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.contrib import messages
-from django.views.generic import ListView, DetailView, View
+from django.views.generic import View
 from django.conf import settings
 from rest_framework.authtoken.models import Token
+import json
+import secrets
+from django.http import JsonResponse, HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import datetime
+import csv
+import xlwt
+from usercontact.models import Contact
 
 # Create your views here.
 
@@ -19,11 +27,16 @@ import string
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
+
 def create_ref_code():
-    return ''.join(random.choices(string.ascii_lowercase + string.digits))
+    ref = secrets.token_urlsafe(50)
+    return ref
 
 
-def RegisterUser(request):
+
+
+def registerUser(request):
     user_form = UserForm(request.POST or None)
     userInfo_form = UserInfoForm(request.POST or None)
     if user_form.is_valid() and userInfo_form.is_valid():
@@ -97,10 +110,22 @@ def shopPage(request):
     categories = Category.objects.all().order_by('-created')
     products = Products.objects.filter(available = True)
     disc_prices = Products.objects.filter(discount_price__gt = 0)
+    paginator = Paginator(products, 6)
+    page_request_var = 'page'
+    page_num = request.GET.get(page_request_var)
+    try:
+        page_obj = paginator.page(page_num)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:   
+        page_obj = paginator.page(paginator.num_pages) 
+    print(page_obj)
     context = {
         'categories': categories,
         'products': products,
-        'disc_prices': disc_prices
+        'page_obj': page_obj,
+        'disc_prices': disc_prices,
+        'page_num': page_request_var
     }
     return render(request, 'eMarket/shop.html', context)
 
@@ -111,8 +136,8 @@ def categoryPage(request):
     }
     return render(request, 'eMarket/category.html', context)
 
-def categoryDetailPage(request, id):
-    category = Category.objects.get(id = id)
+def categoryDetailPage(request, slug):
+    category = Category.objects.get(slug = slug)
     categories = Category.objects.all().order_by('-created')
     products = products = Products.objects.filter(available = True, category = category)
     context = {
@@ -136,12 +161,14 @@ def favourite(request, id):
     prod_id = get_object_or_404(Products, id = id, available=True)
     if prod_id.favourite.filter(id = request.user.id).exists():
         prod_id.favourite.remove(request.user)
-        return redirect("eMarket:fav_product")
         messages.info(request, "One Favourite Item Removed")
+        return redirect("eMarket:fav_product")
+        
     else:
         prod_id.favourite.add(request.user)
-        return redirect("eMarket:fav_product")
         messages.info(request, "One Favourite Item Added")
+        return redirect("eMarket:fav_product")
+        
     return redirect("eMarket:detail", id = id)
 
 def favouriteProducts(request):
@@ -341,6 +368,7 @@ class PaymentView(View):
 
     def post(self, *args, **kwargs):
         order = Order.objects.get(user=self.request.user, ordered = False)
+        print(order)
         token = self.request.POST.get('stripeToken')
         amount = int(order.get_total() * 100)
         
@@ -360,6 +388,7 @@ class PaymentView(View):
             payment.save()
 
             order_item = order.items.all()
+            print(order_item)
             order_item.update(ordered = True)
             for item in order_item:
                 item.save()
@@ -370,7 +399,8 @@ class PaymentView(View):
             order.ref_code = create_ref_code()
             order.save()
             messages.success(self.request, "Your order was successful")
-            return redirect('eMarket:home')
+            return redirect("eMarket:payment-success", order.ref_code)
+            #return paymentSuccess(order.ref_code)
 
         except stripe.error.CardError as e:
             # Since it's a decline, stripe.error.CardError will be caught
@@ -410,6 +440,121 @@ class PaymentView(View):
             # Send email to ourselves
             messages.error(self.request, "serious error occured, we have been notified")
             return redirect("eMarket:home")
+
+def paymentSuccess(request, ref_code):
+    order = Order.objects.get(user=request.user, ordered = True, ref_code = ref_code)
+    return render(request, 'eMarket/payment_success.html', {'order': order})
+
+def exportCSV(request):
+    response = HttpResponse(content_type = 'text/csv')
+    response['Content-Disposition'] = f'attachment; filename=Reciept \ {datetime.datetime.now()}.csv'
+
+    writer = csv.writer(response)
+    writer.writerow(['title', 'description', 'quantity' 'price', 'Total'])
+
+    order = Order.objects.get(user = request.user, ordered = True, export_csv = False)
+    
+    for ord in order.items.all():
+        writer.writerow([ord.item.title, ord.item.description, ord.quantity, ord.get_final_price(), ''])
+        
+    writer.writerow(['','','','', order.get_total()])
+    
+    order.export_csv = True
+    order.save()
+    
+    return response
+
+
+
+def contact(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        Contact.objects.create(email = email, message = message)
+        messages.success(request, 'Message sent')
+        return redirect('eMarket:contact')
+    return render(request, 'eMarket/contact.html')
+
+
+
+'''def exportExcel(request):
+    response = HttpResponse(content_type = 'application/ms-excel')
+    response['Content-Disposition'] = f'attachment; filename=Reciept \ {datetime.datetime.now()}.xls'
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Payment recieve')
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    font_style.font.bold =True
+
+    columns = ['title', 'description', 'quantity' 'price']
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+    
+    font_style = xlwt.XFStyle()
+
+    order = Order.objects.get(user = request.user, ordered = True, export_excel = False)
+    #ord = order.items.all().values_list('items_item_title', 'items_item_description', 'items_quantity' 'items_get_total_price')
+
+    rows = []
+    print(rows)
+    for ord in order.items.all():
+        data = {
+            'title': ord.item.title,
+            'description': ord.item.description,
+            'quantity': ord.quantity,
+            'price': ord.get_final_price()
+        }
+        rows.append(data)
+
+    for row in rows:
+        row_num=+1
+
+        for col_num in range(len(row)):
+            ws.write(row_num, col_num, str(row[col_num]), font_style)
+    
+    order.export_excel = True
+    order.save()
+    wb.save(response)
+    return response'''
+
+
+
+
+
+
+
+
+# JSON FOR SERRCH PRODUCT
+def searchProduct(request):
+    if request.method == 'POST':
+        prod = json.loads(request.body)
+        search = prod.get('search')
+
+        search_prods = Products.objects.filter(title__icontains = search) | Products.objects.filter(description__icontains = search) | Products.objects.filter(category__slug__icontains = search)
+        result = []
+        if (search_prods):
+            for i in search_prods:
+                data = {
+                    'title': i.title,
+                    'description': i.description,
+                    'img': i.image.url,
+                    'price': i.price,
+                    'prod_url': i.slug,
+                    'auth': request.user.is_authenticated,
+                    'id': i.id,
+                    'fav': i.favourite
+                }
+                result.append(data)
+            return JsonResponse(json.dumps(result, indent=4, sort_keys=True, default=str), safe=False)
+        else:
+            data = {
+                'resErr': 'You can not send an empty data'
+            }
+            return JsonResponse(json.dumps(data, indent=4, sort_keys=True, default=str), safe=False)
+        
+
 
 
 

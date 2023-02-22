@@ -28,8 +28,8 @@ SECRET_KEY = config('SECRET_KEY')
 #DEBUG = True
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["52.54.38.177"]
-#ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = ["52.54.38.177"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'Blog',
     'eMarket',
     'eMarketApi',
+    'usercontact',
     'stripe',
     'rest_framework',
     'rest_framework.authtoken',

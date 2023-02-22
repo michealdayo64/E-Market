@@ -1,0 +1,55 @@
+
+{% extends '../base.html' %}
+{% load static %}
+{% block title %} 
+Organic | Payment
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+    <div class="container">
+      <div class="alert alert-warning alert-dismissable" role="alert">
+        <button class="close" data-dismiss="alert">
+          <small><sup>x</sup></small>
+        </button>
+        {{message}}
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+
+<div class="bg-light">
+    <div class="container">
+        <div class="row justify justify-content-center">
+            <div class="col-11 col-md-8 col-lg-6 col-xl-5">
+                <form class="" method="post">{% csrf_token %}
+                    <div class="card bg-dark">
+                        <div class="row mt-0">
+                            <div class="col-md-12 ">
+                                <h4 class="" style="color: blueviolet;">Contact Us</h4>
+                                <p style="color: aliceblue;">Use the form below to share your questions, ideas, comments and feedback</p>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-3">
+                            <div class="col-md-12 mb-0">
+                                <p class="mb-1">Email</p> <input id="e-mail" type="text" placeholder="Enter your email" name="email" class="form-control input-box rm-border">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12 mb-2">
+                                <p class="mb-1">Message</p> <textarea id="message" type="text" placeholder="Enter your message" name="message" class="form-control input-box rm-border"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row justify-content-center mb-0">
+                            <div class="col-md-12 px-3"> <input type="submit" value="Submit" class="btn btn-block btn-purple rm-border"> </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

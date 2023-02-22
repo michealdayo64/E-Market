@@ -1,0 +1,76 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %} 
+Organic | Payment Success
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+    <div class="container">
+      <div class="alert alert-warning alert-dismissable" role="alert">
+        <button class="close" data-dismiss="alert">
+          <small><sup>x</sup></small>
+        </button>
+        {{message}}
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+  
+    <div class="container wow fadeIn">
+      <div class="text-center">
+       <p></p>
+        <h2>Payment Successful</h2>
+        
+      </div>
+
+      <div class="row">
+        
+        <div class="col-md-12 order-md-1">
+          <h4 class="mb-3"></h4>
+
+                
+                  <!--<a href="#" style="color: aliceblue; text-decoration: none; font-weight: bold;" class="btn btn-primary">Download Payment Reciept as PDF</a> -->
+                  <a href="{% url 'eMarket:export-csv' %}" style="color: aliceblue; text-decoration: none; font-weight: bold;" class="btn btn-danger">Download Payment Reciept as CSV</a>
+                  <!--<a href="{% url 'eMarket:export-excel' %}" style="color: aliceblue; text-decoration: none; font-weight: bold;" class="btn btn-success">Export Payment Reciept as EXCEL</a> -->
+                
+                </div>
+                <br><br>
+              
+                <div class="col-md-12 order-md-2 mb-4">
+                    <h4 class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-muted">Your cart</span>
+                      <span class="badge badge-secondary badge-pill">{{ order.items.count }}</span>
+                    </h4>
+                    <ul class="list-group mb-3">
+                      {% for order_item in order.items.all %}
+                      <li class="list-group-item d-flex justify-content-between lh-condensed">
+                        <div>
+                          <h6 class="my-0">{{ order_item.quantity }} x {{ order_item.item.title }}</h6>
+                          <small class="text-muted">{{ order_item.item.description }}</small>
+                        </div>
+                        <span class="text-muted">${{ order_item.get_final_price }}</span>
+                      </li>
+                        {% endfor %}
+                        {% if order.coupon %}
+                      <li class="list-group-item d-flex justify-content-between bg-light">
+                        <div class="text-success">
+                          <h6 class="my-0">Promo code</h6>
+                          <small>{{ order.coupon.code }}</small>
+                        </div>
+                        <span class="text-success">${{ order.coupon.amount }}</span>
+                      </li>
+                      {% endif %}
+                      <li class="list-group-item d-flex justify-content-between">
+                        <span>Total (USD)</span>
+                        <strong>${{ order.get_total }}</strong>
+                      </li>
+                    </ul>
+              
+        </div>
+      </div>
+
+    </div>
+  {% endblock %}
