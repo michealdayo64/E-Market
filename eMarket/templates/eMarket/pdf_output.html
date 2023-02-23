@@ -1,0 +1,63 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        @page{
+            size: "A4";
+            margin: 2.5cm 1.5cm 3.5cm 1.5cm;
+
+            @top-center{
+            content: "Organic Food Enterprise";
+        }
+
+        @bottom-right{
+            content: "Page " counter(page) " of  " counter(pages);
+        }
+        }
+
+        
+
+    </style>
+</head>
+<body>
+    <img src="http://52.54.38.177/static/img/logo.png" alt="">
+
+    <table class="table">
+        <thead class="thead">
+            <tr>
+                <th>No</th>
+                <th>title</th>
+                <th>description</th>
+                <th>quantity</th>
+                <th>price</th>
+            </tr>
+        </thead>
+
+        <tbody class="tbody">
+            {% for i in reciept %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ i.item.title }}</td>
+                <td>{{ i.item.description }}</td>
+                <td>{{ i.quantity }}</td>
+                <td>{{ i.get_final_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        <tbody class="tbody">
+            <tr>
+                <td>Total</td>
+                <td>{{ total }}</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

@@ -24,6 +24,7 @@ urlpatterns = [
     path('payment/<paymentOption>/', views.PaymentView.as_view(), name = 'payment'),
     path('payment-success/<ref_code>/', views.paymentSuccess, name = 'payment-success'),
     path('export-csv/', views.exportCSV, name = 'export-csv'),
+    path('export-pdf/', views.exportPDF, name = 'export-pdf'),
     #path('export-excel/', views.exportExcel, name = 'export-excel'),
     path('contact/', views.contact, name = 'contact'),
     path('search/', csrf_exempt( views.searchProduct), name = 'search')

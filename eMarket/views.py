@@ -19,6 +19,9 @@ import datetime
 import csv
 import xlwt
 from usercontact.models import Contact
+from django.template.loader import render_to_string
+from weasyprint import HTML
+import tempfile
 
 # Create your views here.
 
@@ -475,6 +478,26 @@ def contact(request):
         messages.success(request, 'Message sent')
         return redirect('eMarket:contact')
     return render(request, 'eMarket/contact.html')
+
+def exportPDF(request):
+    response = HttpResponse(content_type = 'application/pdf')
+    response['Content-Disposition'] = f'inline; attachment; filename=Reciept \ {datetime.datetime.now()}.pdf'
+    response['Content-Transfer-Encoding'] = 'binary'
+
+    order = Order.objects.filter(user = request.user)[0]
+    ord = order.items.all()
+
+    html_string = render_to_string('eMarket/pdf_output.html', {'reciept': ord, 'total': order.get_total()})
+    html = HTML(string = html_string)
+    result = html.write_pdf()
+
+    with tempfile.NamedTemporaryFile(delete=True) as output:
+        output.write(result)
+        output.flush()
+        output = open(output.name, 'rb')
+        response.write(output.read())
+     
+    return response
 
 
 
