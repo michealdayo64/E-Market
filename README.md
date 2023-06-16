@@ -1,5 +1,5 @@
 # E-Market
-This is an Emarket system. more like an E-commerce website  where you get to order farm products online. The system was achieved using Python, Django, Sqlite DB, Html, CSS, Javascript. The features added in the system are listed below;
+This is an Emarket system. more like an E-commerce website  where you get to order farm products online. The system was achieved using Python, Django, Sqlite DB, Html, CSS, Javascript. The features added in the system are listed below;..
 
 1. Shopping List and Category: The page display farm products by category and list. User can search by search product by category or list of product
 ![Screen Shot 2023-06-15 at 11 42 41 AM](https://github.com/michealdayo64/E-Market/assets/55289122/5b996a53-ef16-4d4f-b657-cd9e04095d13)
